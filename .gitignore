@@ -1,0 +1,11 @@
+node_modules/
+.next/
+.tools/
+.env*
+test-results/
+playwright-report/
+*.log
+*.tsbuildinfo
+next-env.d.ts
+.server.pid
+alec_linkedin.pdf
