@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { CareerChat } from "@/components/career-chat";
 import "./globals.css";
 
 const sans = localFont({ src: "../fonts/manrope.ttf", variable: "--font-sans", display: "swap", weight: "200 800" });
@@ -16,5 +17,5 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { themeColor: "#171917", colorScheme: "dark light" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en-GB" className={`${sans.variable} ${display.variable}`}><body>{children}</body></html>;
+  return <html lang="en-GB" className={`${sans.variable} ${display.variable}`}><body>{children}<CareerChat/></body></html>;
 }
