@@ -1,0 +1,38 @@
+.variant-steps {
+  background: #252723;
+}
+.orbit-mode-1 .point-sphere {
+  filter: hue-rotate(48deg) saturate(0.45);
+}
+.orbit-mode-2 .point-sphere {
+  filter: hue-rotate(150deg) saturate(0.45);
+}
+.hero-copy > p {
+  font-size: 0.875rem;
+}
+.about-copy {
+  font-size: 0.8125rem;
+}
+.career-body > p,
+.career-body ul,
+.practice-row p,
+.project-card > p {
+  font-size: 0.75rem;
+}
+.career-company {
+  font-size: 0.6875rem;
+}
+.career-period {
+  font-size: 0.6875rem;
+}
+.will-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.75s ease,
+    transform 0.75s ease;
+}
+.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}

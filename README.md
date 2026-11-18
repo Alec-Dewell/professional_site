@@ -1,67 +1,83 @@
 # Alec Dewell | personal website
 
-A locally running Next.js portfolio, with a dark editorial design, copper accents, a custom interactive orbital illustration, a career timeline and a dedicated page for future portfolio collections. Profile facts come from `../alec_linkedin.pdf`.
+A Next.js portfolio with a dark editorial design, copper accents, an interactive orbital illustration, a career timeline, a page for future portfolio collections and an optional AI career chat.
 
 ## Run locally
 
-Requires Node.js 20.9 or newer.
+Requires Node.js 20.9 or newer. From the repository root:
 
 ```powershell
-cd C:\Users\Alec.Dewell\Udemy\AIVIbeCoding\site
+cd site
 npm install
+copy .env.example .env.local   # then fill in OPENAI_API_KEY if you want the chat
 npm run dev
 ```
 
 Open **http://127.0.0.1:3100**.
 
-For a production server, run `npm run build` followed by `npm start`. Both scripts use port 3100, so stop any existing server on that port first.
-
-If this handoff’s background server is still running, stop it from the `site` directory with `Stop-Process -Id (Get-Content .server.pid)` before starting another one.
+For a production server, run `npm run build` followed by `npm start`. Both use port 3100, so stop any existing server on that port first.
 
 ## Update the content
 
-- `src/lib/content.ts`: contact details, career entries and future portfolio collections.
-- `src/app/page.tsx`: introduction, about section and approach.
-- `src/app/work/page.tsx`: future portfolio page; replace the clearly labelled upcoming entries with real projects as they are ready.
-- `src/app/globals.css`: responsive layouts, colours, typography and animation.
+All career facts live in **`src/lib/content.ts`**: profile, experience, education, about paragraphs, practice areas and portfolio collections. The pages **and** the AI chat both read from this file, so edit facts there only. A test (`M2` in `tests/chat-api.spec.ts`) fails if a displayed fact stops reaching the AI prompt.
 
-The original profile PDF stays outside the website. The full-profile link goes to LinkedIn. Fonts are served locally. Contact actions open an email client or copy the email address; there is no contact-form backend.
+| File                                                                 | Purpose                                                    |
+| -------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `src/app/page.tsx`, `src/app/work/page.tsx`                          | Page layout                                                |
+| `src/app/privacy/page.tsx`                                           | Privacy notice (see the launch checklist below)            |
+| `src/components/sections.tsx`                                        | Reusable section heading, career entry, project card       |
+| `src/components/header.tsx`, `copy-email.tsx`, `reveal-observer.tsx` | The only client-side components besides the chat and orbit |
+| `src/app/globals.css` → `src/styles/*.css`                           | Styles, split by section; import order matters             |
+
+Fonts are subsetted variable WOFF2 files served locally. `scripts/prepare-assets.py` regenerates them (development only; needs `pip install fonttools brotli`). `scripts/generate-orbit.mjs` regenerates the point-cloud sphere.
 
 ## Career chat
 
-The floating **Ask my AI** button opens Alec’s digital twin on either page. It answers career questions using the profile in `src/lib/content.ts` and the additional professional context in `src/lib/server/career-context.ts`.
+The floating **Ask my AI** button opens Alec’s digital twin. It answers career questions using `src/lib/content.ts` via the prompt in `src/lib/server/career-context.ts`. Requests go from the server to OpenAI’s Responses API with `store: false` and a 900-token cap. The key is read only on the server and never sent to the browser. The rest of the site works without a key.
 
-Add your OpenAI API key to `site/.env` or `site/.env.local`:
+### Environment variables
 
-```dotenv
-OPENAI_API_KEY=your_key_here
-# Optional UTC cutoff for this app:
-OPEN_AI_EXPIRATION=2026-12-07T00:00:00Z
-```
+See `.env.example` for the full list. Restart the server after changing any of them.
 
-Restart the server after changing the key. It is read only by the server’s `POST /api/chat` route and is never sent to the browser. Environment files are ignored by Git. The rest of the website works without a key.
+| Variable                   | Default                 | Purpose                                                                                                                 |
+| -------------------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `OPENAI_API_KEY`           | —                       | Required for the chat                                                                                                   |
+| `OPEN_AI_EXPIRATION`       | —                       | ISO 8601 cutoff after which the app stops calling OpenAI (does not revoke the key)                                      |
+| `CAREER_MODEL`             | `gpt-4.1-mini`          | Model ID; invalid values fall back to the default                                                                       |
+| `CHAT_DAILY_REQUEST_LIMIT` | `200`                   | Global ceiling on chat requests per UTC day, whoever sends them                                                         |
+| `CHAT_CLIENT_IP_HEADER`    | —                       | Header your host sets with the real client IP (e.g. `cf-connecting-ip`). Unset: all visitors share one 10/minute bucket |
+| `CHAT_SIGNING_SECRET`      | random per process      | Signs assistant replies so visitors cannot forge chat history. **Set it** when running more than one instance           |
+| `SITE_URL`                 | `http://127.0.0.1:3100` | Public origin for canonical URLs, Open Graph, sitemap; `https://` also enables HSTS                                     |
 
-If `OPEN_AI_EXPIRATION` is set, the app stops sending requests at that timestamp. Use an ISO 8601 timestamp with a timezone. An invalid timestamp also disables chat. This is an application cutoff; it does not revoke the credential in your OpenAI account.
+### How abuse and cost are limited
 
-The model is `gpt-4.1-mini`, set by `CAREER_MODEL` in `src/lib/server/career-chat.ts`. Requests go directly to OpenAI’s [Responses API](https://developers.openai.com/api/reference/resources/responses/methods/create), with `store: false` and a maximum of 900 output tokens. API usage is billed to your OpenAI account. Rate limits or account configuration problems are shown as safe error messages in the chat.
+- Cross-site browser requests are rejected. Requests with no `Origin` header (scripts) are allowed but go through the same limits.
+- Per-client limit of 10 requests per minute. `X-Forwarded-For` is **not** trusted unless named in `CHAT_CLIENT_IP_HEADER`, because clients can forge it. When the limiter table is full it evicts the oldest client rather than locking everyone out.
+- A daily request budget caps total spend. Also set a hard monthly budget on the OpenAI project.
+- Questions are limited to 2,000 characters. The browser trims older exchanges so a conversation never exceeds 21 messages or 24,000 characters.
+- Each assistant reply carries a server HMAC signature. Edited or invented "assistant" turns are rejected with HTTP 409 before reaching OpenAI.
+- Limits and budgets are in memory: they reset on restart and are per instance. A shared store (for example Redis) is needed for multi-instance hosting.
 
-Conversations are kept in React state in the current tab. Closing the panel preserves the conversation; **Start a new chat** clears it, and reloading the page resets it. The latest ten exchanges accompany each follow-up so the model can understand the conversation. This app does not write transcripts to storage or logs. OpenAI processes the submitted messages under its [API data policies](https://developers.openai.com/api/docs/guides/your-data), as noted in the chat. Setting `store: false` disables stored Responses state; it does not claim that all provider-side retention is disabled.
-
-The prompt requires the twin to acknowledge missing information and identify itself as AI. Answers are generated, so they can still be wrong. Keep the career profile current and verify anything important with Alec.
-
-Requests are validated, limited to 2,000 characters per question and subject to a 60-second timeout. A basic in-memory limiter permits ten requests per client per minute. It resets when the process restarts; shared rate limiting would be needed for a public deployment across multiple server instances.
-
-## Verification
+## Quality checks
 
 ```powershell
-npm run typecheck
-npm run build
-# With the local server running:
-npm run test:e2e
+npm run lint          # ESLint (Next.js core-web-vitals + TypeScript rules)
+npm run typecheck     # TypeScript
+npm run format:check  # Prettier (npm run format to fix)
+npm run test:e2e      # Builds, starts the server and runs all Playwright tests
+npm run check         # All of the above
 ```
 
-The checks cover desktop/mobile navigation, career disclosures, portfolio destinations, clipboard actions, local fonts, layout overflow and the 404 page. Chat tests exercise conversation history and retries, keyboard access, cancellation and input validation. Provider responses are mocked in repeatable tests so they do not consume API quota. The live smoke check is run separately against the real model. Chromium must be installed for Playwright (`npx playwright install chromium` if needed).
+Playwright starts the production server automatically. If a server is already running on port 3100 locally it is reused, so stop it first if it is serving old code. Install Chromium once with `npx playwright install chromium`.
 
-With the server running, `node scripts/check-career-chat.mjs` sends three real career questions to the configured model. It prints the answers, checks the model ID, and stops on a provider error. This check uses billable OpenAI API tokens.
+The `api` project tests server logic once, without a browser. The `desktop` and `mobile` projects cover navigation, chat behaviour, security headers and CSP, an automated WCAG 2.2 AA scan (axe), minimum text size, layout overflow, the privacy page, SEO routes and asset weight. Every chat test mocks the provider, so the suite never spends API credit. CI runs the same checks on each push (`.github/workflows/ci.yml`).
 
-Variable fonts and their open-source licenses are bundled locally. `scripts/prepare-assets.py` can refresh them from the official Google Fonts repository during development; it is not used at build time or runtime.
+`node scripts/check-career-chat.mjs` sends three real questions to the configured model through a running server. It uses **billable** tokens; run it deliberately.
+
+## Before deploying publicly
+
+- [ ] Oliver James Comms and Information Security have approved the level of internal detail in `src/lib/content.ts` being published and sent to OpenAI.
+- [ ] The privacy notice (`src/app/privacy/page.tsx`) has been reviewed by a qualified adviser (controller, lawful basis, international transfers).
+- [ ] `CHAT_CLIENT_IP_HEADER`, `CHAT_SIGNING_SECRET`, `CHAT_DAILY_REQUEST_LIMIT` and `SITE_URL` are set for the host.
+- [ ] A hard monthly budget is set on the OpenAI project.
+- [ ] HSTS is enabled at the host or via `SITE_URL=https://…`.

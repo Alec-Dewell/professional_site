@@ -340,3 +340,65 @@ Until then, `robots: { index: true }` has no effect locally.
 - **S2 depends on hosting:** whether a given host overwrites `X-Forwarded-For` varies by platform; check the provider's documentation.
 - **Colour contrast** was not measured with a tool; A1 recommends an automated audit instead of asserting specific failures.
 - **Out of scope:** the `.env` values were not displayed or inspected beyond the variable names. The `.tools/pypdf` package and `tutorial.md` were not reviewed.
+
+---
+
+## 7. Remediation log (18 November 2026)
+
+All findings were worked through on branch `AI-integration`; nothing has been committed. Raw logs and before/after screenshots are in [review-evidence/](review-evidence/).
+
+### Verification results
+
+| Check | Result | Evidence |
+|---|---|---|
+| Baseline before any change | 34 / 34 tests passed | screenshots in `review-evidence/screenshots/before/` |
+| `npm run lint` (new) | 0 problems | [lint.log](review-evidence/lint.log) |
+| `npm run typecheck` | Pass | [typecheck.log](review-evidence/typecheck.log) |
+| `npm run format:check` (new) | All files formatted | [format.log](review-evidence/format.log) |
+| `npm audit --omit=dev` | 0 vulnerabilities | [audit.log](review-evidence/audit.log) |
+| `npm run build` | Pass; every page static except `/api/chat` | [build.log](review-evidence/build.log) |
+| Playwright, clean build via `webServer` | **69 / 69 passed** | [playwright.log](review-evidence/playwright.log) |
+| Playwright, second run (stability) | **69 / 69 passed** | [playwright-run2.log](review-evidence/playwright-run2.log) |
+| Live response headers | CSP and security headers present | [headers.log](review-evidence/headers.log) |
+
+The suite grew from 34 to 69 runs. Each new test is named after the finding it proves (for example `S3: a full limiter evicts…`), so the log doubles as a traceability matrix.
+
+### Status by finding
+
+| ID | Status | What changed | Proven by |
+|---|---|---|---|
+| S1 | **Partly done; action needed** | Unused `OPENROUTER_API_KEY` line removed from `.env`; `.env.example` added (and un-ignored). **The key itself must still be revoked in the OpenRouter dashboard; I cannot do that.** | `.env` now lists only `OPENAI_API_KEY`, `OPEN_AI_EXPIRATION` |
+| S2 | Fixed | `X-Forwarded-For` ignored unless a trusted header is named in `CHAT_CLIENT_IP_HEADER` (right-most hop used); new global `ChatBudget` daily cap (`CHAT_DAILY_REQUEST_LIMIT`, default 200) | `S2:` tests ×3 (30 spoofed IPs give 10 upstream calls; budget returns 503 + `Retry-After`) |
+| S3 | Fixed | Limiter evicts the oldest entry when full; cleanup stops at the first live entry | `S3:` test (501st client admitted, size stays 500) |
+| S4 | Fixed | CSP, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, COOP; HSTS when `SITE_URL` is https | `S4:` test (headers + zero CSP violations on 4 pages with chat opened); headers.log |
+| S5 | Fixed | Server HMAC-signs each reply over (question, answer); forged, unsigned, swapped or foreign-key turns get 409 before any provider call; signatures never sent upstream | `S5:` tests ×4, including against the real running route |
+| C1 | **Open; business decision** | No content changed. Requires Comms / InfoSec approval; recorded in README "Before deploying publicly" checklist | — |
+| C2 | Done in code; **legal review needed** | `/privacy` page (factual description of what the code does), linked from chat and footer; "don't share personal details" notice; prompt tells the AI not to ask for personal data | `C2:` tests (no cookies, no third-party requests, link works) |
+| B1 | Fixed | Shared `CHAT_HISTORY_CHAR_LIMIT`; client `trimHistory()` drops oldest pairs; distinct error messages and status codes | `B1:` tests ×4, including 8 exchanges of ~5.4k characters in the browser |
+| B2 | Fixed | `Header` derives the current page from `usePathname()`; prop removed | `B2:` test (404, privacy, home: none; /work: Portfolio) |
+| B3 | Fixed | `colorScheme: "dark"` and `color-scheme: dark` on `:root` | `B3:` test under emulated light mode |
+| B4 | Fixed | `Footer` is now a server component | `B4:` test (no hydration warnings on 3 pages) |
+| B5 | Fixed | Elements already on screen are never given `will-reveal` | `B5:` test (MutationObserver records zero on-screen hides) |
+| M1 | Fixed | Prettier applied; CSS split losslessly into 10 ordered files in `src/styles/` (2,593 non-blank lines before and after); markup extracted to `components/sections.tsx` | format.log; visual comparison |
+| M2 | Fixed | `content.ts` is the single source (about, education, clarifications, extra facts); prompt built from it; `year` derived from `period` | `M2:` test (every displayed fact reaches the prompt) |
+| M3 | Fixed | ESLint 9 + `eslint-config-next` 16.4.6, Prettier, `lint` / `format` / `check` scripts | lint.log, format.log |
+| M4 | Fixed | All internal routes use `<Link>` | `M4:` test (window marker survives navigation) |
+| M5 | Fixed | Named constants; `CAREER_MODEL` env var (validated); `ArtType` union; stable message IDs; `useId` workaround removed; smoke script follows the configured model | `M5:` test; orbit gradient test |
+| A1 | Fixed | 116 sub-11px sizes raised to 11px, all font sizes now `rem`; six decorative glyphs kept small and `aria-hidden`; axe found and I fixed 10 contrast failures (to ≥ 4.6:1) and 2 label-in-name failures (logo link, chat button) | `A1:` tests (text size; axe WCAG 2.2 AA on 4 pages + chat: 0 violations) |
+| A2 | Fixed | Solid 2px accent focus ring; `readOnly` + `aria-busy` instead of `disabled` | `A2:` test (focus retained while loading) |
+| P1 | Fixed | Sphere 185 KB / 3,192 elements → 45 KB / 17 paths (pixel diff: 0.65% of pixels, 99.8% brightness); fonts 301 KB TTF → 51 KB subsetted WOFF2 with no needed glyph lost | `P1:` test; `sphere-old.png` / `sphere-new.png` |
+| P2 | Fixed | Site shell split; only header, copy button and reveal observer are client components | build.log |
+| T1 | Fixed | Playwright `webServer` builds and starts the app; GitHub Actions workflow added | Both test runs started their own server. **CI workflow has not been run on GitHub yet.** |
+| T2 | Fixed | Separate `api` project; pure tests run once, not twice | playwright.log (`[api]` entries) |
+| T3 | Fixed | Tests added for every bug and security fix above, plus missing-Origin behaviour; hard-coded email replaced with `profile.email` | playwright.log |
+| H1 | Done | Logs, PID, tsbuildinfo, `.tools/` and old TTFs deleted; PDF moved to `../alec_linkedin.pdf`. `tutorial.md` left untracked for the owner to decide (it now describes some pre-refactor code) | `git status` |
+| H2 | Fixed | README rewritten: relative paths, env table, how limits work, launch checklist | README.md |
+| D1 | Fixed | `metadataBase` from `SITE_URL`, canonical URLs, generated Open Graph image, `sitemap.xml`, `robots.txt` | `D1:` test |
+
+### Residual risks and notes
+
+- **Dev-only advisory:** installing ESLint brings in a `picomatch` ReDoS advisory (GHSA-fc5q-39xc-vjpf) via `typescript-eslint`. It does not affect the shipped app (production audit is clean). npm's only offered fix downgrades `eslint-config-next` to 14, which is incompatible with Next 16, so it was not applied.
+- CSP keeps `'unsafe-inline'` for scripts and styles because Next.js injects inline bootstrap code; nonces would make every page dynamic.
+- Limits, budget and the default signing secret are per process. Set `CHAT_SIGNING_SECRET` and use a shared store before running several instances.
+- Not exercised: the billable live smoke test (`scripts/check-career-chat.mjs`), and the GitHub Actions workflow.
+- Cosmetic: the extra privacy line makes the chat's welcome panel slightly taller, so on open the "ASK ABOUT MY CAREER" label sits close to the header border.

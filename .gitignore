@@ -2,6 +2,7 @@ node_modules/
 .next/
 .tools/
 .env*
+!.env.example
 test-results/
 playwright-report/
 *.log

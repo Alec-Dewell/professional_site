@@ -1,0 +1,81 @@
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: #171917ed;
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--line);
+}
+.header-inner {
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+.brand-mark {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 2.0625rem;
+  letter-spacing: -3.5px;
+  line-height: 1;
+  position: relative;
+  padding-right: 11px;
+}
+.brand-mark > span {
+  position: absolute;
+  right: -1px;
+  top: -6px;
+  font-size: 0.9375rem;
+  letter-spacing: 0;
+  color: var(--accent);
+}
+.brand-name {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  letter-spacing: 0.2px;
+  font-weight: 600;
+  border-left: 1px solid var(--line);
+  padding-left: 17px;
+}
+.brand-name > span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 1.7px;
+  color: var(--muted);
+  margin-top: 4px;
+  font-weight: 400;
+}
+.desktop-nav {
+  display: flex;
+  gap: 35px;
+  margin-left: 55px;
+}
+.desktop-nav a {
+  font-size: 0.6875rem;
+  color: #babfb3;
+  transition: color 0.2s;
+}
+.desktop-nav a:hover,
+.desktop-nav a[aria-current] {
+  color: var(--accent);
+}
+.header-contact {
+  font-size: 0.6875rem;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  border: 1px solid #7c806f;
+  padding: 9px 16px;
+}
+.menu-toggle {
+  display: none;
+}
+.mobile-nav {
+  display: none;
+}

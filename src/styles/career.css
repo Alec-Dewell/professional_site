@@ -1,0 +1,211 @@
+.journey-section {
+  background: var(--bg-deep);
+}
+.journey-intro {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 54px;
+}
+.journey-intro .serif-accent {
+  color: #b6bfa6;
+}
+.journey-intro > p {
+  font-size: 0.75rem;
+  color: var(--muted);
+  padding-bottom: 4px;
+  line-height: 1.9;
+}
+.timeline {
+  border-top: 1px solid var(--line);
+}
+.career-entry {
+  position: relative;
+  border-bottom: 1px solid var(--line);
+}
+.career-entry:before {
+  content: "";
+  position: absolute;
+  left: 94px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--line);
+}
+.career-entry summary {
+  display: grid;
+  grid-template-columns: 124px 1fr 170px 22px;
+  align-items: center;
+  gap: 20px;
+  list-style: none;
+  cursor: pointer;
+  padding-block: 31px;
+}
+.career-entry summary::-webkit-details-marker {
+  display: none;
+}
+.career-year {
+  color: #838d78;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  position: relative;
+  align-self: start;
+  margin-top: 4px;
+}
+.timeline-node {
+  position: absolute;
+  right: 24px;
+  top: 5px;
+  background: var(--bg-deep);
+  border: 1px solid #68715d;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  z-index: 1;
+}
+.current-role .timeline-node {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: 0 0 0 5px #e7b48f0d;
+}
+.career-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.career-company {
+  font-size: 0.6875rem;
+  color: #b3bca6;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  line-height: 1.4;
+}
+.career-title {
+  font-family: var(--font-display);
+  font-size: 1.4375rem;
+  line-height: 1.2;
+  letter-spacing: -0.7px;
+  transition: color 0.2s;
+}
+.career-entry summary:hover .career-title {
+  color: var(--accent);
+}
+.career-period {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: #858f7b;
+  text-align: right;
+}
+.career-period-mobile {
+  display: none;
+}
+.now-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.5px;
+  border: 1px solid #b5c49c40;
+  padding: 2px 6px;
+  color: #bccda2;
+}
+.now-badge span {
+  width: 3px;
+  height: 3px;
+  background: #bccda2;
+  border-radius: 50%;
+}
+.expand-icon {
+  position: relative;
+  height: 20px;
+  width: 20px;
+  margin-left: auto;
+}
+.expand-icon:before,
+.expand-icon:after {
+  content: "";
+  position: absolute;
+  height: 1px;
+  width: 12px;
+  background: #9aa58c;
+  top: 10px;
+  left: 4px;
+}
+.expand-icon:after {
+  transform: rotate(90deg);
+  transition: transform 0.2s;
+}
+.career-entry[open] .expand-icon:after {
+  transform: rotate(0);
+}
+.career-body {
+  padding: 0 50px 34px 144px;
+  max-width: 880px;
+}
+.career-body h3 {
+  font-size: 1.0625rem;
+  margin-bottom: 14px;
+  letter-spacing: -0.3px;
+  color: #d6ddc9;
+}
+.career-body > p {
+  font-size: 0.6875rem;
+  line-height: 1.9;
+  color: #a1ab95;
+  max-width: 660px;
+}
+.career-body ul {
+  padding-left: 13px;
+  font-size: 0.6875rem;
+  line-height: 1.85;
+  color: #929d85;
+  max-width: 640px;
+  margin: 14px 0 20px;
+}
+.career-body li {
+  padding-left: 5px;
+  margin-top: 5px;
+}
+.career-body li::marker {
+  color: #c89e7e;
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.tags > span {
+  border: 1px solid #8b977340;
+  padding: 3px 9px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: #a8b697;
+}
+.education-note {
+  margin-top: 38px;
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 9px 50px;
+}
+.education-note > .eyebrow {
+  grid-row: span 2;
+  align-self: start;
+  color: #7f8974;
+  font-size: 0.6875rem;
+}
+.education-note p {
+  font-size: 0.6875rem;
+  color: #a8b19d;
+}
+.education-note p > span {
+  margin-inline: 9px;
+  color: #5f6a53;
+}
+.education-note p > .education-year {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: #768269;
+  white-space: nowrap;
+}

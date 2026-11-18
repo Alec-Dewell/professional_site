@@ -1,0 +1,155 @@
+.work-page-hero {
+  padding-block: 54px 62px;
+}
+.work-page-hero > .eyebrow {
+  display: flex;
+  margin-top: 56px;
+  margin-bottom: 25px;
+  font-size: 0.6875rem;
+}
+.work-page-hero h1 {
+  font-size: clamp(52px, 7vw, 92px);
+  line-height: 1.04;
+}
+.work-page-hero h1 .serif-accent {
+  color: var(--accent);
+}
+.work-page-intro {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 40px;
+  margin-top: 30px;
+}
+.work-page-intro p {
+  font-size: 0.8125rem;
+  color: var(--muted);
+  max-width: 500px;
+  line-height: 1.9;
+}
+.work-collection {
+  padding-bottom: 35px;
+}
+.collection-entry {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 65px;
+  border-top: 1px solid var(--line);
+  padding-block: 48px;
+  align-items: center;
+  scroll-margin-top: 30px;
+}
+.collection-entry .project-art {
+  aspect-ratio: 1.65;
+}
+.collection-entry .project-meta {
+  margin-top: 0;
+}
+.collection-entry .project-meta .coming-soon {
+  margin-top: 0;
+  font-size: 0.6875rem;
+}
+.collection-entry h2 {
+  font-size: 2.0625rem;
+  line-height: 1.2;
+  margin-top: 20px;
+  letter-spacing: -1.2px;
+}
+.collection-entry p {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 15px;
+  line-height: 1.9;
+}
+.collection-entry .tags {
+  margin-top: 20px;
+}
+.collection-entry .collection-note {
+  font-size: 0.6875rem;
+  color: #79876e;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.work-follow {
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-block: 26px 70px;
+  gap: 25px;
+}
+.work-follow p {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.not-found {
+  min-height: 65vh;
+  padding-block: 90px;
+}
+.not-found h1 {
+  font-size: clamp(40px, 6vw, 78px);
+  margin-block: 25px;
+}
+.not-found .serif-accent {
+  color: var(--accent);
+}
+.not-found p {
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+
+/* Privacy notice and other long-form text pages. */
+.legal-page {
+  max-width: 760px;
+  padding-block: 70px 100px;
+}
+.legal-page > .eyebrow {
+  display: block;
+  margin-top: 40px;
+}
+.legal-page h1 {
+  font-size: clamp(40px, 6vw, 72px);
+  margin-block: 25px 12px;
+}
+.legal-page h1 .serif-accent {
+  color: var(--accent);
+}
+.legal-page .legal-updated {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  margin-bottom: 40px;
+}
+.legal-page section {
+  margin-top: 36px;
+}
+.legal-page h2 {
+  font-size: 1.375rem;
+  margin-bottom: 12px;
+}
+.legal-page p,
+.legal-page li {
+  color: var(--muted);
+  font-size: 0.9375rem;
+  line-height: 1.8;
+}
+.legal-page p + p {
+  margin-top: 12px;
+}
+.legal-page ul {
+  margin: 12px 0;
+  padding-left: 20px;
+  list-style: disc;
+}
+.legal-page li + li {
+  margin-top: 8px;
+}
+.legal-page a {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.legal-page code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+}
